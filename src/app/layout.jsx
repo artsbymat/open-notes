@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
-import "./globals.css";
+import "@/styles/globals.css";
+import "@/styles/md-content.css";
 import { Separator } from "@/components/ui/separator";
 import { getAllMarkdownFiles } from "@/lib/content";
 import { buildFileTree } from "@/lib/utils";
@@ -39,7 +40,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const fileTree = buildFileTree(getAllMarkdownFiles());
+  const allMarkdownFiles = getAllMarkdownFiles();
+  const fileTree = buildFileTree(allMarkdownFiles);
 
   return (
     <html lang="en">
@@ -58,7 +60,7 @@ export default function RootLayout({ children }) {
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
-              <AppBreadcrumb />
+              <AppBreadcrumb allMarkdownFiles={allMarkdownFiles} />
             </header>
             <div className="flex flex-1 flex-col gap-4 p-4">
               <div className="border min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4">

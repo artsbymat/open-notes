@@ -5,10 +5,21 @@ import matter from "gray-matter";
 import { EXCLUDE_FOLDER, PUBLISH_MODE } from "@/constants";
 import { slug as slugify } from "github-slugger";
 
-export function getAllMarkdownFiles({
-  baseDir = "src/vault",
-  exclude = ["Templates"],
-} = {}) {
+export let cache = null;
+let backlinksCache = null;
+
+export function getAllMarkdownFiles(options = {}) {
+  const opts = {
+    baseDir: "src/vault",
+    exclude: ["Templates"],
+    ...options,
+  };
+
+  if (cache && cache.length > 0) {
+    return cache;
+  }
+
+  const { baseDir, exclude } = opts;
   const basePath = path.resolve(baseDir);
 
   const ignorePatterns = (
@@ -25,9 +36,7 @@ export function getAllMarkdownFiles({
       if (PUBLISH_MODE && !data.publish) return null;
 
       const rel = path.relative(basePath, filepath);
-
       const noExt = rel.replace(/\.md$/, "");
-
       const normalized = noExt.split(path.sep).join("/");
 
       if (rel === "index.md") {
@@ -44,7 +53,7 @@ export function getAllMarkdownFiles({
 
       const finalSlug = data.slug
         ? `/${data.slug}`
-        : "/" + cleanSlug.split("/").map(slugify).join("/");
+        : "/" + cleanSlug.split("/").map(slugify).join("/").toLowerCase();
 
       const title = data.title || path.basename(noExt);
 
@@ -59,5 +68,129 @@ export function getAllMarkdownFiles({
       a.title.localeCompare(b.title, "en", { sensitivity: "base" }),
     );
 
+  cache = items;
+
   return items;
+}
+
+function extractLinks(content) {
+  const links = [];
+
+  // Extract wikilinks [[Page]] or [[Page|Alias]]
+  const wikilinkRegex = /\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g;
+  let match;
+  while ((match = wikilinkRegex.exec(content)) !== null) {
+    links.push(match[1].trim());
+  }
+
+  // Extract markdown links [text](url)
+  const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  while ((match = mdLinkRegex.exec(content)) !== null) {
+    const url = match[2].trim();
+    // Only include relative links (not external URLs)
+    if (
+      !url.startsWith("http://") &&
+      !url.startsWith("https://") &&
+      !url.startsWith("#")
+    ) {
+      links.push(url);
+    }
+  }
+
+  return links;
+}
+
+function buildBacklinksMap() {
+  if (backlinksCache) {
+    return backlinksCache;
+  }
+
+  const all = getAllMarkdownFiles();
+  const backlinks = {};
+
+  // Initialize backlinks for all slugs
+  all.forEach((item) => {
+    backlinks[item.slug] = [];
+  });
+
+  // Build a map of title/filepath to slug for matching wikilinks
+  const titleToSlug = {};
+  const filepathToSlug = {};
+  all.forEach((item) => {
+    titleToSlug[item.title.toLowerCase()] = item.slug;
+    const pathWithoutExt = item.filepath.replace(/\.md$/, "");
+    filepathToSlug[pathWithoutExt.toLowerCase()] = item.slug;
+  });
+
+  // Process each file to find links
+  all.forEach((sourceItem) => {
+    const fullPath = path.join("src/vault", sourceItem.filepath);
+    const raw = fs.readFileSync(fullPath, "utf8");
+    const { content } = matter(raw);
+
+    const links = extractLinks(content);
+
+    links.forEach((link) => {
+      const linkLower = link.toLowerCase();
+      let targetSlug = null;
+
+      // Try to match by title (for wikilinks)
+      if (titleToSlug[linkLower]) {
+        targetSlug = titleToSlug[linkLower];
+      }
+      // Try to match by filepath
+      else if (filepathToSlug[linkLower]) {
+        targetSlug = filepathToSlug[linkLower];
+      }
+      // Try to match as a relative path with leading slash
+      else {
+        const cleanLink = link.startsWith("/") ? link : `/${link}`;
+        const foundItem = all.find(
+          (item) =>
+            item.slug === cleanLink ||
+            item.slug === cleanLink.replace(/\/$/, ""),
+        );
+        if (foundItem) {
+          targetSlug = foundItem.slug;
+        }
+      }
+
+      // Add backlink if target found
+      if (targetSlug && backlinks[targetSlug]) {
+        backlinks[targetSlug].push({
+          slug: sourceItem.slug,
+          title: sourceItem.title,
+          filepath: sourceItem.filepath,
+        });
+      }
+    });
+  });
+
+  backlinksCache = backlinks;
+  return backlinks;
+}
+
+export function getMarkdownBySlug(slug) {
+  const cleanSlug = slug === "/" ? "/" : slug.replace(/\/$/, "");
+  const all = getAllMarkdownFiles();
+  const item = all.find((x) => x.slug === cleanSlug);
+
+  if (!item) return null;
+
+  const fullPath = path.join("src/vault", item.filepath);
+
+  const raw = fs.readFileSync(fullPath, "utf8");
+  const { data: frontmatter, content } = matter(raw);
+
+  const backlinksMap = buildBacklinksMap();
+  const backlinks = backlinksMap[item.slug] || [];
+
+  return {
+    slug: item.slug,
+    title: item.title,
+    filepath: item.filepath,
+    frontmatter,
+    content,
+    backlinks,
+  };
 }
