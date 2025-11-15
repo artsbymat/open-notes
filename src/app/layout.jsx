@@ -10,14 +10,9 @@ import { AppSidebar } from "@/components/app-sidebar";
 
 import "./globals.css";
 import { Separator } from "@/components/ui/separator";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { getAllMarkdownFiles } from "@/lib/content";
+import { buildFileTree } from "@/lib/utils";
+import { AppBreadcrumb } from "@/components/app-breadcrumb";
 
 const poppins = Poppins({
   variable: "--font-inter",
@@ -44,6 +39,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const fileTree = buildFileTree(getAllMarkdownFiles());
+
   return (
     <html lang="en">
       <head>
@@ -53,7 +50,7 @@ export default function RootLayout({ children }) {
         className={`${poppins.variable} ${jetbrains.variable} ${arabic.variable} antialiased`}
       >
         <SidebarProvider>
-          <AppSidebar />
+          <AppSidebar fileTree={fileTree} />
           <SidebarInset>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
               <SidebarTrigger className="-ml-1" />
@@ -61,21 +58,7 @@ export default function RootLayout({ children }) {
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">components</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">ui</BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>button.tsx</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+              <AppBreadcrumb />
             </header>
             <div className="flex flex-1 flex-col gap-4 p-4">
               <div className="border min-h-[100vh] flex-1 rounded-xl md:min-h-min p-4">
