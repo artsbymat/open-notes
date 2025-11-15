@@ -3,7 +3,7 @@ import path from "path";
 import fg from "fast-glob";
 import matter from "gray-matter";
 import { EXCLUDE_FOLDER, PUBLISH_MODE } from "@/constants";
-import { slug as slugify } from "github-slugger";
+import GithubSlugger, { slug as slugify } from "github-slugger";
 
 export let cache = null;
 let backlinksCache = null;
@@ -170,6 +170,93 @@ function buildBacklinksMap() {
   return backlinks;
 }
 
+function buildOutgoingLinks(content) {
+  const all = getAllMarkdownFiles();
+  const links = extractLinks(content);
+  const outgoingLinks = [];
+
+  const titleToSlug = {};
+  const filepathToSlug = {};
+  all.forEach((item) => {
+    titleToSlug[item.title.toLowerCase()] = item.slug;
+    const pathWithoutExt = item.filepath.replace(/\.md$/, "");
+    filepathToSlug[pathWithoutExt.toLowerCase()] = item.slug;
+  });
+
+  links.forEach((link) => {
+    const linkLower = link.toLowerCase();
+    let targetSlug = null;
+    let targetTitle = null;
+    let targetFilepath = null;
+
+    // Try to match by title (for wikilinks)
+    if (titleToSlug[linkLower]) {
+      targetSlug = titleToSlug[linkLower];
+      const found = all.find((item) => item.slug === targetSlug);
+      if (found) {
+        targetTitle = found.title;
+        targetFilepath = found.filepath;
+      }
+    }
+    // Try to match by filepath
+    else if (filepathToSlug[linkLower]) {
+      targetSlug = filepathToSlug[linkLower];
+      const found = all.find((item) => item.slug === targetSlug);
+      if (found) {
+        targetTitle = found.title;
+        targetFilepath = found.filepath;
+      }
+    }
+    // Try to match as a relative path with leading slash
+    else {
+      const cleanLink = link.startsWith("/") ? link : `/${link}`;
+      const found = all.find(
+        (item) =>
+          item.slug === cleanLink || item.slug === cleanLink.replace(/\/$/, ""),
+      );
+      if (found) {
+        targetSlug = found.slug;
+        targetTitle = found.title;
+        targetFilepath = found.filepath;
+      }
+    }
+
+    // Add outgoing link if target found and not duplicate
+    if (targetSlug && !outgoingLinks.some((link) => link.slug === targetSlug)) {
+      outgoingLinks.push({
+        slug: targetSlug,
+        title: targetTitle,
+        filepath: targetFilepath,
+      });
+    }
+  });
+
+  return outgoingLinks;
+}
+
+function buildTableOfContents(content) {
+  const headings = [];
+  const lines = content.split("\n");
+  const slugger = new GithubSlugger();
+
+  lines.forEach((line) => {
+    const match = line.match(/^(#{1,6})\s+(.+)$/);
+    if (match) {
+      const level = match[1].length;
+      const text = match[2].trim();
+      const id = slugger.slug(text);
+
+      headings.push({
+        level,
+        text,
+        id,
+      });
+    }
+  });
+
+  return headings;
+}
+
 export function getMarkdownBySlug(slug) {
   const cleanSlug = slug === "/" ? "/" : slug.replace(/\/$/, "");
   const all = getAllMarkdownFiles();
@@ -184,6 +271,8 @@ export function getMarkdownBySlug(slug) {
 
   const backlinksMap = buildBacklinksMap();
   const backlinks = backlinksMap[item.slug] || [];
+  const outgoingLinks = buildOutgoingLinks(content);
+  const tableOfContents = buildTableOfContents(content);
 
   return {
     slug: item.slug,
@@ -192,5 +281,7 @@ export function getMarkdownBySlug(slug) {
     frontmatter,
     content,
     backlinks,
+    outgoingLinks,
+    tableOfContents,
   };
 }
