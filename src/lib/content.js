@@ -239,20 +239,73 @@ function buildTableOfContents(content) {
   const lines = content.split("\n");
   const slugger = new GithubSlugger();
 
-  lines.forEach((line) => {
-    const match = line.match(/^(#{1,6})\s+(.+)$/);
-    if (match) {
-      const level = match[1].length;
-      const text = match[2].trim();
-      const id = slugger.slug(text);
+  // Helper to strip common inline markdown syntaxes so slug matches rehype text extraction
+  const stripInlineMarkdown = (str) => {
+    return (
+      str
+        // Images ![alt](url) -> alt
+        .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+        // Links [text](url) -> text
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+        // Inline code `code` -> code
+        .replace(/`([^`]+)`/g, "$1")
+        // Bold/italic markers * _ ~ ** __ ~~ -> remove markers only
+        .replace(/[\*_~]{1,3}([^\*_~]+)[\*_~]{1,3}/g, "$1")
+        // HTML tags -> remove
+        .replace(/<[^>]+>/g, "")
+        // Escape backslashes
+        .replace(/\\([#`*_{}\[\]()!+\-.>~|])/g, "$1")
+        .trim()
+    );
+  };
 
-      headings.push({
-        level,
-        text,
-        id,
-      });
+  let inFence = false;
+  let fenceMarker = null; // ``` or ~~~
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Toggle fenced code block detection
+    const fenceMatch = line.match(/^([`~]{3,})(.*)$/);
+    if (fenceMatch) {
+      const marker = fenceMatch[1][0];
+      if (!inFence) {
+        inFence = true;
+        fenceMarker = marker;
+      } else if (marker === fenceMarker) {
+        inFence = false;
+        fenceMarker = null;
+      }
+      continue;
     }
-  });
+
+    if (inFence) continue; // ignore headings inside code fences
+
+    // ATX headings: # ... ######
+    const atx = line.match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
+    if (atx) {
+      const level = atx[1].length;
+      const rawText = atx[2].trim();
+      const text = stripInlineMarkdown(rawText);
+      const id = slugger.slug(text);
+      headings.push({ level, text, id });
+      continue;
+    }
+
+    // Setext headings: h1/h2 using === or --- underline
+    if (i + 1 < lines.length) {
+      const underline = lines[i + 1];
+      const setext = underline.match(/^\s*(=+|-+)\s*$/);
+      if (setext && line.trim().length > 0) {
+        const level = setext[1][0] === "=" ? 1 : 2;
+        const rawText = line.trim();
+        const text = stripInlineMarkdown(rawText);
+        const id = slugger.slug(text);
+        headings.push({ level, text, id });
+        i++; // skip underline line
+      }
+    }
+  }
 
   return headings;
 }
