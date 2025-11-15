@@ -12,7 +12,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Fragment } from "react";
 
-export function AppBreadcrumb({ allMarkdownFiles }) {
+export function AppBreadcrumb({ allMarkdownFiles = [] }) {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 

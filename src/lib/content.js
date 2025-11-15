@@ -338,3 +338,12 @@ export function getMarkdownBySlug(slug) {
     tableOfContents,
   };
 }
+
+export function getAllSlugs() {
+  const all = getAllMarkdownFiles();
+  return all
+    .filter((item) => item.slug !== "/")
+    .map((item) => ({
+      slug: item.slug.replace(/^\//, "").split("/").filter(Boolean),
+    }));
+}
