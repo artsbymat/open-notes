@@ -4,13 +4,22 @@ import remarkGfm from "remark-gfm";
 
 import { rehypeSlug } from "@/lib/rehype/rehype-slug";
 import { remarkWikilink } from "@/lib/remark/remark-wikilink";
+import { CustomParagraph } from "./custom-paragraph";
+import { CustomImage } from "./custom-image";
 
 export function RenderMarkdown({ post }) {
   const remarkPlugins = [remarkWikilink, remarkGfm];
   const rehypePlugins = [rehypeSlug];
 
   return (
-    <MarkdownAsync remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins}>
+    <MarkdownAsync
+      components={{
+        p: CustomParagraph,
+        img: CustomImage
+      }}
+      remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
+    >
       {post.content}
     </MarkdownAsync>
   );
