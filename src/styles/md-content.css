@@ -232,3 +232,39 @@
   opacity: 1;
   transition: 300ms;
 }
+
+/* Custom Callout */
+/* .callout { */
+/*   mix-blend-mode: normal !important; */
+/* } */
+
+#md-content [data-callout="arabic"] {
+  --rc-color-light: var(--chart-1);
+  --rc-color-dark: var(--chart-4);
+}
+
+#md-content [data-callout="arabic"] div.callout-content p {
+  font-size: 1.8rem !important;
+  font-family: var(--font-arabic), sans-serif;
+  line-height: 2 !important;
+  direction: rtl !important;
+}
+
+#md-content [data-callout="latin"] {
+  --rc-color-light: rgb(114, 163, 78);
+  --rc-color-dark: rgb(114, 163, 78);
+}
+
+#md-content [data-callout="latin"] .callout-content {
+  font-family: serif;
+}
+
+#md-content [data-callout="translation"] {
+  --rc-color-light: rgb(190, 140, 93);
+  --rc-color-dark: rgb(190, 140, 93);
+}
+
+/* Custom Classes */
+.quran span[data-rehype-pretty-code-figure] code span {
+  font-family: serif;
+}
