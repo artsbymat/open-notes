@@ -271,6 +271,11 @@
   --rc-color-dark: rgb(190, 140, 93);
 }
 
+/* Katex */
+#md-content .katex-display {
+  font-size: 1.5rem;
+}
+
 /* Custom Classes */
 .quran span[data-rehype-pretty-code-figure] code span {
   font-family: serif;

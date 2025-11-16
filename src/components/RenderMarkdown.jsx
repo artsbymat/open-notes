@@ -1,10 +1,12 @@
 import { MarkdownAsync } from "react-markdown";
 
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import rehypeExpressiveCode from "rehype-expressive-code";
 import rehypeShiftHeading from "rehype-shift-heading";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeCallouts from "rehype-callouts";
+import rehypeKatex from "rehype-katex";
 
 import { rehypeSlug } from "@/lib/rehype/rehype-slug";
 import { remarkWikilink } from "@/lib/remark/remark-wikilink";
@@ -15,14 +17,15 @@ import { CustomImage } from "./custom-image";
 import { CustomAnchor } from "./custom-anchor";
 import { arabicIcon, latinIcon, translateIcon } from "./ui/icons";
 import "rehype-callouts/theme/obsidian";
+import "katex/dist/katex.min.css";
 
 export function RenderMarkdown({ post }) {
-  const remarkPlugins = [remarkGfm, remarkWikilink];
+  const remarkPlugins = [remarkGfm, remarkMath, remarkWikilink];
   const rehypePlugins = [
     rehypeSlug,
-    [rehypeExpressiveCode, rehypeExpressiveCodeOptions],
     [rehypeAutolinkHeadings, { behavior: "append" }],
     [rehypeShiftHeading, { shift: 1 }],
+    [rehypeKatex],
     [
       rehypeCallouts,
       {
@@ -33,7 +36,8 @@ export function RenderMarkdown({ post }) {
           translation: { title: "Translation", indicator: translateIcon }
         }
       }
-    ]
+    ],
+    [rehypeExpressiveCode, rehypeExpressiveCodeOptions]
   ];
 
   return (

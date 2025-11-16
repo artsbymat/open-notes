@@ -32,8 +32,10 @@
     "rehype-autolink-headings": "^7.1.0",
     "rehype-callouts": "^2.1.2",
     "rehype-expressive-code": "^0.41.3",
+    "rehype-katex": "^7.0.1",
     "rehype-shift-heading": "^2.0.0",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
