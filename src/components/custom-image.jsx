@@ -1,4 +1,16 @@
 import Image from "next/image";
+import { RenderExcalidraw } from "@/components//RenderExcalidraw";
+
+// Maybe needed
+// const isCloudImage = (src) => {
+//   if (typeof src !== "string") return false;
+//   return src.startsWith("http://") || src.startsWith("https://");
+// };
+
+// const isLocalImage = (src) => {
+//   if (typeof src !== "string") return false;
+//   return src.startsWith("/") && !isCloudImage(src);
+// };
 
 export const CustomImage = (props) => {
   const { alt, src, width } = props;
@@ -6,6 +18,15 @@ export const CustomImage = (props) => {
   if (!src) {
     console.warn("CustomImage: No src provided");
     return null;
+  }
+
+  // const isCloud = isCloudImage(src);
+  // const isLocal = isLocalImage(src);
+
+  const pattern = /^\/content\/assets\/(?:.+\/)*.+\.excalidraw\.svg$/;
+
+  if (pattern.test(src)) {
+    return <RenderExcalidraw alt={alt} src={src} />;
   }
 
   const dynamicWidth = (() => {

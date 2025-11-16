@@ -89,26 +89,62 @@ function transformObsidianLinksInSvg() {
     let content = fs.readFileSync(filePath, "utf8");
     let modified = false;
 
-    // Match Obsidian links: obsidian://open?vault=content&file=...
-    const obsidianLinkRegex = /<a\s+href="obsidian:\/\/open\?vault=[^"]*&(?:amp;)?file=([^"]+)"/g;
+    // Helper function to transform Obsidian path to Next.js path
+    const transformPath = (encodedPath, tagType) => {
+      // Validate that we have a path
+      if (!encodedPath || encodedPath.trim().length === 0) {
+        console.log(`   ⚠️  Skipped empty path in ${tagType}: ${path.basename(filePath)}`);
+        return null;
+      }
+
+      try {
+        // Decode URL encoding
+        const decodedPath = decodeURIComponent(encodedPath);
+
+        // Split path by '/'
+        const pathParts = decodedPath.split("/").filter(part => part.trim().length > 0);
+
+        // Validate we have path parts
+        if (pathParts.length === 0) {
+          console.log(`   ⚠️  Skipped invalid path in ${tagType}: ${encodedPath}`);
+          return null;
+        }
+
+        // Convert each part to slug
+        const slugger = new GithubSlugger();
+        const slugParts = pathParts.map((part) => slugger.slug(part));
+
+        // Create Next.js path
+        return "/" + slugParts.join("/");
+      } catch (error) {
+        console.log(`   ⚠️  Error processing path in ${tagType} "${encodedPath}": ${error.message}`);
+        return null;
+      }
+    };
+
+    // Match Obsidian links in <a> tags: obsidian://open?vault=<any-vault>&file=...
+    // Handles both &file= and &amp;file= variations
+    const obsidianLinkRegex = /<a\s+href="obsidian:\/\/open\?vault=[^&"]+&(?:amp;)?file=([^"]+)"/gi;
 
     content = content.replace(obsidianLinkRegex, (match, encodedPath) => {
-      modified = true;
+      const nextjsPath = transformPath(encodedPath, '<a>');
+      if (nextjsPath) {
+        modified = true;
+        return `<a href="${nextjsPath}"`;
+      }
+      return match;
+    });
 
-      // Decode URL encoding
-      const decodedPath = decodeURIComponent(encodedPath);
+    // Match Obsidian links in <iframe> tags
+    const obsidianIframeRegex = /<iframe\s+src="obsidian:\/\/open\?vault=[^&"]+&(?:amp;)?file=([^"]+)"/gi;
 
-      // Split path by '/'
-      const pathParts = decodedPath.split("/");
-
-      // Convert each part to slug
-      const slugger = new GithubSlugger();
-      const slugParts = pathParts.map((part) => slugger.slug(part));
-
-      // Create Next.js path
-      const nextjsPath = "/" + slugParts.join("/");
-
-      return `<a href="${nextjsPath}"`;
+    content = content.replace(obsidianIframeRegex, (match, encodedPath) => {
+      const nextjsPath = transformPath(encodedPath, '<iframe>');
+      if (nextjsPath) {
+        modified = true;
+        return `<iframe src="${nextjsPath}"`;
+      }
+      return match;
     });
 
     if (modified) {
