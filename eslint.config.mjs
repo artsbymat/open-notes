@@ -11,7 +11,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "src/vault/**",
-  ]),
+    "scripts/**"
+  ])
 ]);
 
 export default eslintConfig;
