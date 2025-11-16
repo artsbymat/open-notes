@@ -12,7 +12,7 @@ import { rehypeExpressiveCodeOptions } from "@/lib/rehype/expressive-code-option
 
 export function RenderMarkdown({ post }) {
   const remarkPlugins = [remarkGfm, remarkWikilink];
-  const rehypePlugins = [rehypeSlug];
+  const rehypePlugins = [rehypeSlug, [rehypeExpressiveCode, rehypeExpressiveCodeOptions]];
 
   return (
     <MarkdownAsync
@@ -20,8 +20,8 @@ export function RenderMarkdown({ post }) {
         p: CustomParagraph,
         img: CustomImage
       }}
-      remarkPlugins={[remarkPlugins]}
-      rehypePlugins={[rehypePlugins, [rehypeExpressiveCode, rehypeExpressiveCodeOptions]]}
+      remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
     >
       {post.content}
     </MarkdownAsync>
