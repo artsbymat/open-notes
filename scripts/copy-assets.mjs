@@ -3,6 +3,7 @@ import path from "path";
 import fg from "fast-glob";
 import matter from "gray-matter";
 import { fileURLToPath } from "url";
+import GithubSlugger from "github-slugger";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,6 +65,61 @@ function removeCodeBlocks(content) {
   cleaned = cleaned.replace(/^(?: {4}|\t).+$/gm, "");
 
   return cleaned;
+}
+
+function transformObsidianLinksInSvg() {
+  const projectRoot = path.resolve(__dirname, "..");
+  const assetsDir = path.join(projectRoot, "public", "content", "assets");
+
+  console.log("\n🔗 Transforming Obsidian links in .excalidraw.svg files...");
+
+  // Find all .excalidraw.svg files
+  const svgFiles = fg.sync(`${assetsDir}/**/*.excalidraw.svg`);
+
+  if (svgFiles.length === 0) {
+    console.log("   No .excalidraw.svg files found");
+    return;
+  }
+
+  console.log(`   Found ${svgFiles.length} .excalidraw.svg files`);
+
+  let transformedCount = 0;
+
+  svgFiles.forEach((filePath) => {
+    let content = fs.readFileSync(filePath, "utf8");
+    let modified = false;
+
+    // Match Obsidian links: obsidian://open?vault=content&file=...
+    const obsidianLinkRegex = /<a\s+href="obsidian:\/\/open\?vault=[^"]*&(?:amp;)?file=([^"]+)"/g;
+
+    content = content.replace(obsidianLinkRegex, (match, encodedPath) => {
+      modified = true;
+
+      // Decode URL encoding
+      const decodedPath = decodeURIComponent(encodedPath);
+
+      // Split path by '/'
+      const pathParts = decodedPath.split("/");
+
+      // Convert each part to slug
+      const slugger = new GithubSlugger();
+      const slugParts = pathParts.map((part) => slugger.slug(part));
+
+      // Create Next.js path
+      const nextjsPath = "/" + slugParts.join("/");
+
+      return `<a href="${nextjsPath}"`;
+    });
+
+    if (modified) {
+      fs.writeFileSync(filePath, content, "utf8");
+      transformedCount++;
+      const relativePath = path.relative(assetsDir, filePath);
+      console.log(`   ✓ Transformed: ${relativePath}`);
+    }
+  });
+
+  console.log(`   ✅ Transformed ${transformedCount} files`);
 }
 
 function extractAssetReferences(content) {
@@ -213,6 +269,7 @@ async function copyAssets() {
 // Run the script
 try {
   await copyAssets();
+  transformObsidianLinksInSvg();
 } catch (error) {
   console.error("❌ Error copying assets:", error);
   process.exit(1);
