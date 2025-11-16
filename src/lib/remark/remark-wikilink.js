@@ -30,7 +30,7 @@ export function remarkWikilink() {
           index: match.index,
           length: match[0].length,
           isEmbed: match[1] === "!",
-          content: match[2],
+          content: match[2]
         });
       }
 
@@ -45,7 +45,7 @@ export function remarkWikilink() {
         if (wikilink.index > lastIndex) {
           newNodes.push({
             type: "text",
-            value: text.slice(lastIndex, wikilink.index),
+            value: text.slice(lastIndex, wikilink.index)
           });
         }
 
@@ -75,8 +75,8 @@ export function remarkWikilink() {
         let isMediaAsset = false;
 
         // First check if it's a media asset
-        const mediaUrl = 
-          mediaAssets[linkLower] || 
+        const mediaUrl =
+          mediaAssets[linkLower] ||
           mediaAssets[linkLower.split("/").pop()] ||
           mediaAssets[linkLower.replace(/\.[^.]+$/, "")];
 
@@ -90,9 +90,7 @@ export function remarkWikilink() {
         } else {
           const cleanLink = link.startsWith("/") ? link : `/${link}`;
           const foundItem = cache.find(
-            (item) =>
-              item.slug === cleanLink ||
-              item.slug === cleanLink.replace(/\/$/, ""),
+            (item) => item.slug === cleanLink || item.slug === cleanLink.replace(/\/$/, "")
           );
           if (foundItem) {
             targetSlug = foundItem.slug;
@@ -124,7 +122,7 @@ export function remarkWikilink() {
               type: "image",
               url: url,
               alt: displayText,
-              title: displayText,
+              title: displayText
             });
           } else {
             // Embed as link (for documents)
@@ -134,9 +132,9 @@ export function remarkWikilink() {
               children: [
                 {
                   type: "text",
-                  value: `📎 ${displayText}`,
-                },
-              ],
+                  value: `📎 ${displayText}`
+                }
+              ]
             });
           }
         } else {
@@ -147,9 +145,9 @@ export function remarkWikilink() {
             children: [
               {
                 type: "text",
-                value: displayText,
-              },
-            ],
+                value: displayText
+              }
+            ]
           });
         }
 
@@ -160,7 +158,7 @@ export function remarkWikilink() {
       if (lastIndex < text.length) {
         newNodes.push({
           type: "text",
-          value: text.slice(lastIndex),
+          value: text.slice(lastIndex)
         });
       }
 

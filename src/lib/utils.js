@@ -20,18 +20,16 @@ export function buildFileTree(items) {
         current.push({
           type: "file",
           name: item.title,
-          slug: item.slug,
+          slug: item.slug
         });
       } else {
-        let folder = current.find(
-          (c) => c.type === "folder" && c.name === part,
-        );
+        let folder = current.find((c) => c.type === "folder" && c.name === part);
 
         if (!folder) {
           folder = {
             type: "folder",
             name: part,
-            children: [],
+            children: []
           };
           current.push(folder);
         }

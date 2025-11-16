@@ -10,9 +10,7 @@ export function rehypeSlug() {
           .map((child) => {
             if (child.type === "text") return child.value;
             if (child.children) {
-              return child.children
-                .map((c) => (c.type === "text" ? c.value : ""))
-                .join("");
+              return child.children.map((c) => (c.type === "text" ? c.value : "")).join("");
             }
             return "";
           })

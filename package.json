@@ -2,6 +2,7 @@
   "name": "open-notes",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "npm run copy-assets && next dev",
     "build": "npm run copy-assets && next build",

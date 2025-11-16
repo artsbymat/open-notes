@@ -32,13 +32,7 @@ const MEDIA_EXTENSIONS = [
   "m4a",
   "flac",
   // Documents
-  "pdf",
-  "doc",
-  "docx",
-  "ppt",
-  "pptx",
-  "xls",
-  "xlsx"
+  "pdf"
 ];
 
 function removeDirectory(dirPath) {
@@ -56,29 +50,57 @@ async function loadConstants() {
   };
 }
 
+function removeCodeBlocks(content) {
+  let cleaned = content;
+
+  // Remove fenced code blocks (``` or ~~~)
+  cleaned = cleaned.replace(/^```[\s\S]*?^```/gm, "");
+  cleaned = cleaned.replace(/^~~~[\s\S]*?^~~~/gm, "");
+
+  // Remove inline code `code`
+  cleaned = cleaned.replace(/`[^`\n]+`/g, "");
+
+  // Remove indented code blocks (4 spaces or tab at start of line)
+  cleaned = cleaned.replace(/^(?: {4}|\t).+$/gm, "");
+
+  return cleaned;
+}
+
 function extractAssetReferences(content) {
   const assets = new Set();
+
+  // Remove all code blocks and inline code first
+  const cleanedContent = removeCodeBlocks(content);
 
   // Extract embedded wikilinks: ![[asset]]
   const embedRegex = /!\[\[([^\]]+)\]\]/g;
   let match;
-  while ((match = embedRegex.exec(content)) !== null) {
+  while ((match = embedRegex.exec(cleanedContent)) !== null) {
     let assetPath = match[1].trim();
     // Remove heading references
     assetPath = assetPath.split("#")[0].trim();
     // Remove alias
     assetPath = assetPath.split("|")[0].trim();
     if (assetPath) {
-      assets.add(assetPath);
+      // Check if it's likely a media file
+      const ext = assetPath.split(".").pop()?.toLowerCase();
+      if (ext && MEDIA_EXTENSIONS.includes(ext)) {
+        assets.add(assetPath);
+      }
     }
   }
 
   // Extract markdown images: ![alt](path)
   const mdImageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-  while ((match = mdImageRegex.exec(content)) !== null) {
+  while ((match = mdImageRegex.exec(cleanedContent)) !== null) {
     const assetPath = match[2].trim();
-    // Only include relative paths
-    if (!assetPath.startsWith("http://") && !assetPath.startsWith("https://")) {
+    // Only include relative paths (not URLs or anchors)
+    if (
+      !assetPath.startsWith("http://") &&
+      !assetPath.startsWith("https://") &&
+      !assetPath.startsWith("#") &&
+      assetPath.length > 0
+    ) {
       assets.add(assetPath);
     }
   }
