@@ -58,6 +58,8 @@
   --caption-sm-weight: 300;
   --caption-sm-line-height: 1.65;
   --caption-sm-letter-spacing: 0.03em;
+
+  max-width: 80rem;
 }
 
 /* Headings */
