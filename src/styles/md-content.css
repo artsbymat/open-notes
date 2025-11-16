@@ -215,6 +215,13 @@
   overflow-x: auto;
 }
 
+/* Inline Code */
+#md-content p code {
+  background-color: #f2e5bc;
+  border: 1px solid #e8d086;
+  padding: 4px 0;
+}
+
 /* Heading ID */
 #md-content :is(h2, h3, h4, h5, h6) a[href^="#"] span.icon.icon-link::after {
   content: "#";
