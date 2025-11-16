@@ -203,3 +203,12 @@
 #md-content a:hover {
   text-decoration: underline;
 }
+
+/* Code Block */
+#md-content div.expressive-code {
+  margin: 10px 0;
+}
+
+#md-content div.expressive-code span {
+  overflow-x: auto;
+}

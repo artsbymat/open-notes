@@ -13,6 +13,7 @@
     "copy-assets": "node scripts/copy-assets.mjs"
   },
   "dependencies": {
+    "@expressive-code/plugin-line-numbers": "^0.41.3",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-separator": "^1.1.8",
@@ -28,6 +29,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-markdown": "^10.1.0",
+    "rehype-expressive-code": "^0.41.3",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.4.0"
   },
