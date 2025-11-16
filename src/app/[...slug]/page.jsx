@@ -14,8 +14,34 @@ export default async function DetailNotesPage({ params }) {
   const finalSlug = `/` + slug.join("/");
   const post = getMarkdownBySlug(finalSlug);
 
+  console.log(post);
+
   if (!post) {
     return notFound();
+  }
+
+  // Handle folder listing
+  if (post.isFolder) {
+    console.log(post.isFolder);
+    return (
+      <div>
+        <article id="md-content">
+          <h1>{post.title}</h1>
+          <ul className="folder-listing">
+            {post.folders?.map((folder) => (
+              <li key={folder.slug}>
+                <a href={folder.slug}>📁 {folder.title}</a>
+              </li>
+            ))}
+            {post.files?.map((file) => (
+              <li key={file.slug}>
+                <a href={file.slug}>📄 {file.title}</a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    );
   }
 
   const cssClasses = post.frontmatter?.cssclasses?.join(" ") || "";

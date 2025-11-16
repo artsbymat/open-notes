@@ -119,8 +119,7 @@ export function remarkWikilink() {
           if (imageExts.includes(ext)) {
             // Embed as image
             // If alias is a number (size), preserve it in format "link|size" for CustomImage
-            const altText =
-              alias && /^\d+$/.test(alias) ? `${link}|${alias}` : displayText;
+            const altText = alias && /^\d+$/.test(alias) ? `${link}|${alias}` : displayText;
 
             newNodes.push({
               type: "image",

@@ -20,7 +20,10 @@ export function AppBreadcrumb({ allMarkdownFiles = [] }) {
 
   const pageExists = allMarkdownFiles.some((file) => file.slug === pathname);
 
-  if (!pageExists) {
+  const folderPrefix = pathname === "/" ? "/" : pathname + "/";
+  const hasChildrenFiles = allMarkdownFiles.some((file) => file.slug.startsWith(folderPrefix));
+
+  if (!pageExists && !hasChildrenFiles) {
     return null;
   }
 
@@ -39,7 +42,19 @@ export function AppBreadcrumb({ allMarkdownFiles = [] }) {
           const isLast = i === segments.length - 1;
           const href = paths[i];
           const file = allMarkdownFiles.find((f) => f.slug === href);
-          const displayTitle = file?.title || seg;
+
+          let displayTitle = file?.title || seg;
+          if (!file) {
+            const folderPrefix = href + "/";
+            const childFile = allMarkdownFiles.find((f) => f.slug.startsWith(folderPrefix));
+            if (childFile) {
+              const pathParts = childFile.filepath.split("/");
+              const depth = href.split("/").filter(Boolean).length;
+              if (pathParts.length > depth) {
+                displayTitle = pathParts[depth - 1];
+              }
+            }
+          }
 
           if (isLast) {
             return (

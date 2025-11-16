@@ -302,7 +302,95 @@ export function getMarkdownBySlug(slug) {
   const all = getAllMarkdownFiles();
   const item = all.find((x) => x.slug === cleanSlug);
 
-  if (!item) return null;
+  if (!item) {
+    // Check if this slug represents a folder with files/subfolders but no index.md
+    const folderPrefix = cleanSlug === "/" ? "/" : cleanSlug + "/";
+    const filesInFolder = all.filter((x) => {
+      if (cleanSlug === "/") {
+        // Root level: files that don't contain any slash
+        return !x.slug.includes("/") || x.slug === "/";
+      }
+      // Check if file is directly in this folder (not in subfolders)
+      return x.slug.startsWith(folderPrefix) && !x.slug.slice(folderPrefix.length).includes("/");
+    });
+
+    // Detect subfolders with real folder names
+    const subfoldersMap = new Map(); // slug -> real folder name
+    all.forEach((x) => {
+      const relativePath = x.filepath;
+      const pathParts = relativePath.split(path.sep);
+
+      if (cleanSlug === "/") {
+        // Root level: extract first segment if it contains a slash
+        const match = x.slug.match(/^\/([^/]+)\//);
+        if (match && pathParts.length > 1) {
+          const slugPart = match[1];
+          const realName = pathParts[0]; // First directory in path
+          subfoldersMap.set(slugPart, realName);
+        }
+      } else if (x.slug.startsWith(folderPrefix)) {
+        // Extract immediate subfolder name
+        const remainder = x.slug.slice(folderPrefix.length);
+        const match = remainder.match(/^([^/]+)\//);
+        if (match) {
+          const slugPart = match[1];
+          const depth = cleanSlug.split("/").filter(Boolean).length;
+          if (pathParts.length > depth) {
+            const realName = pathParts[depth]; // Folder at current depth
+            subfoldersMap.set(slugPart, realName);
+          }
+        }
+      }
+    });
+
+    const folders = Array.from(subfoldersMap.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([slugPart, realName]) => ({
+        slug: cleanSlug === "/" ? `/${slugPart}` : `${cleanSlug}/${slugPart}`,
+        title: realName,
+        isFolder: true
+      }));
+
+    if (filesInFolder.length > 0 || folders.length > 0) {
+      // Get real folder name from filesystem
+      let folderTitle = "Home";
+      if (cleanSlug !== "/") {
+        // Find a file in this folder or subfolder to extract the real folder name
+        const sampleFile = all.find((x) => x.slug.startsWith(folderPrefix));
+        if (sampleFile) {
+          const relativePath = sampleFile.filepath;
+          const slugParts = cleanSlug.split("/").filter(Boolean);
+          const pathParts = relativePath.split(path.sep);
+          // Get the folder name at the same depth as the slug
+          if (pathParts.length > slugParts.length) {
+            folderTitle = pathParts[slugParts.length - 1];
+          } else {
+            folderTitle = pathParts[pathParts.length - 2] || path.basename(cleanSlug);
+          }
+        } else {
+          folderTitle = path.basename(cleanSlug);
+        }
+      }
+
+      // Return folder listing with both files and subfolders
+      // Filter out index.md files as they represent folders, not regular files
+      const regularFiles = filesInFolder.filter((f) => !f.filepath.endsWith("index.md"));
+
+      return {
+        isFolder: true,
+        slug: cleanSlug,
+        title: folderTitle,
+        files: regularFiles.map((f) => ({
+          slug: f.slug,
+          title: f.title,
+          filepath: f.filepath
+        })),
+        folders: folders
+      };
+    }
+
+    return null;
+  }
 
   const fullPath = path.join("src/vault", item.filepath);
 
