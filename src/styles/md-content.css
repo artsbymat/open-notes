@@ -206,6 +206,10 @@
   text-decoration: underline;
 }
 
+#md-content code {
+  font-family: var(--font-jetbrains);
+}
+
 /* Code Block */
 #md-content div.expressive-code {
   margin: 10px 0;
@@ -283,6 +287,6 @@
 }
 
 /* Custom Classes */
-.quran span[data-rehype-pretty-code-figure] code span {
+#md-content.quran p code {
   font-family: serif;
 }

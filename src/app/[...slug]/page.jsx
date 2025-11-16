@@ -18,10 +18,12 @@ export default async function DetailNotesPage({ params }) {
     return notFound();
   }
 
+  const cssClasses = post.frontmatter?.cssclasses?.join(" ") || "";
+
   return (
     <div>
       <TableOfContents headings={post.tableOfContents} />
-      <article id="md-content">
+      <article id="md-content" className={`${cssClasses}`}>
         <h1>{post.title}</h1>
         <RenderMarkdown post={post} />
       </article>
