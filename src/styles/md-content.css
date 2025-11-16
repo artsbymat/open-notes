@@ -214,3 +214,21 @@
 #md-content div.expressive-code span {
   overflow-x: auto;
 }
+
+/* Heading ID */
+#md-content :is(h2, h3, h4, h5, h6) a[href^="#"] span.icon.icon-link::after {
+  content: "#";
+  margin-left: 4px;
+  color: var(--link);
+}
+
+#md-content :is(h2, h3, h4, h5, h6) a[href^="#"] {
+  text-decoration: none;
+  opacity: 0;
+  transition: 300ms;
+}
+
+#md-content :is(h2, h3, h4, h5, h6):hover a[href^="#"] {
+  opacity: 1;
+  transition: 300ms;
+}
