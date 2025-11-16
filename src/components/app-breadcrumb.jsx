@@ -6,7 +6,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
+  BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -16,9 +16,7 @@ export function AppBreadcrumb({ allMarkdownFiles = [] }) {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 
-  const paths = segments.map(
-    (_, i) => "/" + segments.slice(0, i + 1).join("/"),
-  );
+  const paths = segments.map((_, i) => "/" + segments.slice(0, i + 1).join("/"));
 
   const pageExists = allMarkdownFiles.some((file) => file.slug === pathname);
 

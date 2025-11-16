@@ -1,11 +1,7 @@
 import * as React from "react";
 import { ChevronRight, File, Folder } from "lucide-react";
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +15,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButtonWithAutoClose,
   SidebarRail,
-  SidebarSeparator,
+  SidebarSeparator
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import Logo from "@/assets/logo.svg";

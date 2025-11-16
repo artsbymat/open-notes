@@ -7,7 +7,7 @@ export function OutgoingLinks({ links }) {
 
   return (
     <div className="mb-6">
-      <h3 className="font-semibold mb-3 text-sm uppercase">Outgoing Links</h3>
+      <h3 className="mb-3 text-sm font-semibold uppercase">Outgoing Links</h3>
       <ul className="space-y-2 text-sm">
         {links.map((link, index) => (
           <li key={index}>
