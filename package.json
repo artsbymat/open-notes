@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "npm run copy-assets && next dev",
+    "build": "npm run copy-assets && next build",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "format": "prettier --write --plugin prettier-plugin-tailwindcss ./src"
+    "format": "prettier --write --plugin prettier-plugin-tailwindcss ./src",
+    "copy-assets": "node scripts/copy-assets.mjs"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",

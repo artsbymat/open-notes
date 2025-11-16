@@ -5,14 +5,14 @@ import matter from "gray-matter";
 import { EXCLUDE_FOLDER, PUBLISH_MODE } from "@/constants";
 import GithubSlugger, { slug as slugify } from "github-slugger";
 
-// Unified cache object to store computed items and backlinks
-let cache = null; // { items: Array, backlinks: Object }
+// Unified cache object to store computed items, backlinks, and media assets
+let cache = null; // { items: Array, backlinks: Object, mediaAssets: Object }
 
 export function getAllMarkdownFiles(options = {}) {
   const opts = {
     baseDir: "src/vault",
     exclude: ["Templates"],
-    ...options,
+    ...options
   };
 
   if (cache?.items?.length) return cache.items;
@@ -20,9 +20,9 @@ export function getAllMarkdownFiles(options = {}) {
   const { baseDir, exclude } = opts;
   const basePath = path.resolve(baseDir);
 
-  const ignorePatterns = (
-    EXCLUDE_FOLDER?.length ? EXCLUDE_FOLDER : exclude
-  ).map((dir) => path.join(basePath, dir, "**"));
+  const ignorePatterns = (EXCLUDE_FOLDER?.length ? EXCLUDE_FOLDER : exclude).map((dir) =>
+    path.join(basePath, dir, "**")
+  );
 
   const files = fg.sync(`${basePath}/**/*.md`, { ignore: ignorePatterns });
 
@@ -41,7 +41,7 @@ export function getAllMarkdownFiles(options = {}) {
         return {
           filepath: rel,
           slug: "/",
-          title: data.title || "index",
+          title: data.title || "index"
         };
       }
 
@@ -58,13 +58,11 @@ export function getAllMarkdownFiles(options = {}) {
       return {
         filepath: rel,
         slug: finalSlug,
-        title,
+        title
       };
     })
     .filter(Boolean)
-    .sort((a, b) =>
-      a.title.localeCompare(b.title, "en", { sensitivity: "base" }),
-    );
+    .sort((a, b) => a.title.localeCompare(b.title, "en", { sensitivity: "base" }));
 
   cache = { ...(cache || {}), items };
 
@@ -86,11 +84,7 @@ function extractLinks(content) {
   while ((match = mdLinkRegex.exec(content)) !== null) {
     const url = match[2].trim();
     // Only include relative links (not external URLs)
-    if (
-      !url.startsWith("http://") &&
-      !url.startsWith("https://") &&
-      !url.startsWith("#")
-    ) {
+    if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("#")) {
       links.push(url);
     }
   }
@@ -99,7 +93,6 @@ function extractLinks(content) {
 }
 
 function buildBacklinksMap() {
-  console.log(cache);
   if (cache?.backlinks) return cache.backlinks;
 
   const all = getAllMarkdownFiles();
@@ -143,9 +136,7 @@ function buildBacklinksMap() {
       else {
         const cleanLink = link.startsWith("/") ? link : `/${link}`;
         const foundItem = all.find(
-          (item) =>
-            item.slug === cleanLink ||
-            item.slug === cleanLink.replace(/\/$/, ""),
+          (item) => item.slug === cleanLink || item.slug === cleanLink.replace(/\/$/, "")
         );
         if (foundItem) {
           targetSlug = foundItem.slug;
@@ -157,7 +148,7 @@ function buildBacklinksMap() {
         backlinks[targetSlug].push({
           slug: sourceItem.slug,
           title: sourceItem.title,
-          filepath: sourceItem.filepath,
+          filepath: sourceItem.filepath
         });
       }
     });
@@ -208,8 +199,7 @@ function buildOutgoingLinks(content) {
     else {
       const cleanLink = link.startsWith("/") ? link : `/${link}`;
       const found = all.find(
-        (item) =>
-          item.slug === cleanLink || item.slug === cleanLink.replace(/\/$/, ""),
+        (item) => item.slug === cleanLink || item.slug === cleanLink.replace(/\/$/, "")
       );
       if (found) {
         targetSlug = found.slug;
@@ -223,7 +213,7 @@ function buildOutgoingLinks(content) {
       outgoingLinks.push({
         slug: targetSlug,
         title: targetTitle,
-        filepath: targetFilepath,
+        filepath: targetFilepath
       });
     }
   });
@@ -332,7 +322,7 @@ export function getMarkdownBySlug(slug) {
     content,
     backlinks,
     outgoingLinks,
-    tableOfContents,
+    tableOfContents
   };
 }
 
@@ -341,6 +331,72 @@ export function getAllSlugs() {
   return all
     .filter((item) => item.slug !== "/")
     .map((item) => ({
-      slug: item.slug.replace(/^\//, "").split("/").filter(Boolean),
+      slug: item.slug.replace(/^\//, "").split("/").filter(Boolean)
     }));
+}
+
+export function getAllMediaAssets() {
+  if (cache?.mediaAssets) return cache.mediaAssets;
+
+  const basePath = path.resolve("src/vault");
+  const mediaExtensions = [
+    "png",
+    "jpg",
+    "jpeg",
+    "gif",
+    "svg",
+    "webp",
+    "bmp",
+    "ico",
+    "tiff",
+    "avif",
+    "mp4",
+    "webm",
+    "mov",
+    "avi",
+    "mkv",
+    "mp3",
+    "wav",
+    "ogg",
+    "m4a",
+    "flac",
+    "pdf",
+    "doc",
+    "docx",
+    "ppt",
+    "pptx",
+    "xls",
+    "xlsx"
+  ];
+
+  const patterns = mediaExtensions.map((ext) => `${basePath}/**/*.${ext}`);
+  const files = fg.sync(patterns, { caseSensitiveMatch: false });
+
+  const mediaAssets = {};
+
+  files.forEach((filepath) => {
+    const rel = path.relative(basePath, filepath);
+    const filename = path.basename(filepath);
+    const filenameLower = filename.toLowerCase();
+    const filenameWithoutExt = path.basename(filepath, path.extname(filepath));
+    const filenameWithoutExtLower = filenameWithoutExt.toLowerCase();
+
+    // Public URL path
+    const publicUrl = `/content/assets/${rel.split(path.sep).join("/")}`;
+
+    // Store multiple lookup keys for flexibility
+    if (!mediaAssets[filenameLower]) {
+      mediaAssets[filenameLower] = publicUrl;
+    }
+    if (!mediaAssets[filenameWithoutExtLower]) {
+      mediaAssets[filenameWithoutExtLower] = publicUrl;
+    }
+
+    // Also store with relative path for more specific lookups
+    const relLower = rel.toLowerCase().split(path.sep).join("/");
+    mediaAssets[relLower] = publicUrl;
+  });
+
+  cache = { ...(cache || {}), mediaAssets };
+  return cache.mediaAssets;
 }

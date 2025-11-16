@@ -195,3 +195,11 @@
 #md-content th {
   font-weight: 600;
 }
+
+#md-content a {
+  color: var(--link);
+}
+
+#md-content a:hover {
+  text-decoration: underline;
+}
