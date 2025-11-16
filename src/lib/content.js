@@ -5,8 +5,8 @@ import matter from "gray-matter";
 import { EXCLUDE_FOLDER, PUBLISH_MODE } from "@/constants";
 import GithubSlugger, { slug as slugify } from "github-slugger";
 
-export let cache = null;
-let backlinksCache = null;
+// Unified cache object to store computed items and backlinks
+let cache = null; // { items: Array, backlinks: Object }
 
 export function getAllMarkdownFiles(options = {}) {
   const opts = {
@@ -15,9 +15,7 @@ export function getAllMarkdownFiles(options = {}) {
     ...options,
   };
 
-  if (cache && cache.length > 0) {
-    return cache;
-  }
+  if (cache?.items?.length) return cache.items;
 
   const { baseDir, exclude } = opts;
   const basePath = path.resolve(baseDir);
@@ -68,9 +66,9 @@ export function getAllMarkdownFiles(options = {}) {
       a.title.localeCompare(b.title, "en", { sensitivity: "base" }),
     );
 
-  cache = items;
+  cache = { ...(cache || {}), items };
 
-  return items;
+  return cache.items;
 }
 
 function extractLinks(content) {
@@ -101,9 +99,8 @@ function extractLinks(content) {
 }
 
 function buildBacklinksMap() {
-  if (backlinksCache) {
-    return backlinksCache;
-  }
+  console.log(cache);
+  if (cache?.backlinks) return cache.backlinks;
 
   const all = getAllMarkdownFiles();
   const backlinks = {};
@@ -166,8 +163,8 @@ function buildBacklinksMap() {
     });
   });
 
-  backlinksCache = backlinks;
-  return backlinks;
+  cache = { ...(cache || {}), backlinks };
+  return cache.backlinks;
 }
 
 function buildOutgoingLinks(content) {
