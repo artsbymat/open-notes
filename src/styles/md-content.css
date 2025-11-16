@@ -276,6 +276,12 @@
   font-size: 1.5rem;
 }
 
+/* iframe */
+#md-content iframe {
+  margin: 8px auto;
+  max-width: 100%;
+}
+
 /* Custom Classes */
 .quran span[data-rehype-pretty-code-figure] code span {
   font-family: serif;

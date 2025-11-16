@@ -18,6 +18,7 @@ import { CustomAnchor } from "./custom-anchor";
 import { arabicIcon, latinIcon, translateIcon } from "./ui/icons";
 import "rehype-callouts/theme/obsidian";
 import "katex/dist/katex.min.css";
+import rehypeRaw from "rehype-raw";
 
 export function RenderMarkdown({ post }) {
   const remarkPlugins = [remarkGfm, remarkMath, remarkWikilink];
@@ -37,7 +38,8 @@ export function RenderMarkdown({ post }) {
         }
       }
     ],
-    [rehypeExpressiveCode, rehypeExpressiveCodeOptions]
+    [rehypeExpressiveCode, rehypeExpressiveCodeOptions],
+    [rehypeRaw]
   ];
 
   return (
