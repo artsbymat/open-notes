@@ -9,6 +9,7 @@ import { remarkWikilink } from "@/lib/remark/remark-wikilink";
 import { CustomParagraph } from "./custom-paragraph";
 import { CustomImage } from "./custom-image";
 import { rehypeExpressiveCodeOptions } from "@/lib/rehype/expressive-code-option";
+import { CustomAnchor } from "./custom-anchor";
 
 export function RenderMarkdown({ post }) {
   const remarkPlugins = [remarkGfm, remarkWikilink];
@@ -18,7 +19,8 @@ export function RenderMarkdown({ post }) {
     <MarkdownAsync
       components={{
         p: CustomParagraph,
-        img: CustomImage
+        img: CustomImage,
+        a: CustomAnchor
       }}
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
