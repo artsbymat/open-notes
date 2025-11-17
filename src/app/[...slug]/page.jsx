@@ -14,15 +14,12 @@ export default async function DetailNotesPage({ params }) {
   const finalSlug = `/` + slug.join("/");
   const post = getMarkdownBySlug(finalSlug);
 
-  console.log(post);
-
   if (!post) {
     return notFound();
   }
 
   // Handle folder listing
   if (post.isFolder) {
-    console.log(post.isFolder);
     return (
       <div>
         <article id="md-content">
