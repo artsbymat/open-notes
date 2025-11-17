@@ -215,10 +215,6 @@
   margin: 10px 0;
 }
 
-#md-content div.expressive-code span {
-  overflow-x: auto;
-}
-
 /* Inline Code */
 #md-content :not(pre) > code {
   background-color: #f2e5bc;
