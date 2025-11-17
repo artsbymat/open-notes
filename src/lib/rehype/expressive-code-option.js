@@ -5,7 +5,5 @@ export const rehypeExpressiveCodeOptions = {
   plugins: [pluginLineNumbers()],
   defaultProps: {
     showLineNumbers: false
-  },
-
-  frames: false
+  }
 };
