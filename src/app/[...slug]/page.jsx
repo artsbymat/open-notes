@@ -4,6 +4,7 @@ import { OutgoingLinks } from "@/components/OutgoingLinks";
 import { Backlinks } from "@/components/Backlinks";
 import { getAllSlugs, getMarkdownBySlug } from "@/lib/content";
 import { notFound } from "next/navigation";
+import { FileEntry } from "@/components/FileEntry";
 
 export async function generateStaticParams() {
   return getAllSlugs();
@@ -20,25 +21,7 @@ export default async function DetailNotesPage({ params }) {
 
   // Handle folder listing
   if (post.isFolder) {
-    return (
-      <div>
-        <article id="md-content">
-          <h1>{post.title}</h1>
-          <ul className="folder-listing">
-            {post.folders?.map((folder) => (
-              <li key={folder.slug}>
-                <a href={folder.slug}>📁 {folder.title}</a>
-              </li>
-            ))}
-            {post.files?.map((file) => (
-              <li key={file.slug}>
-                <a href={file.slug}>📄 {file.title}</a>
-              </li>
-            ))}
-          </ul>
-        </article>
-      </div>
-    );
+    return <FileEntry post={post} />;
   }
 
   const cssClasses = post.frontmatter?.cssclasses?.join(" ") || "";
