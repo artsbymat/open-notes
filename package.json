@@ -6,16 +6,20 @@
   "scripts": {
     "dev": "npm run copy-assets && next dev",
     "build": "npm run copy-assets && next build",
+    "postbuild": "npm run build:pagefind",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --write --plugin prettier-plugin-tailwindcss ./src",
-    "copy-assets": "node scripts/copy-assets.mjs"
+    "copy-assets": "node scripts/copy-assets.mjs",
+    "build:pagefind": "pagefind --site .next --output-path .next/static/pagefind && cp -rf .next/static/pagefind ./public"
   },
   "dependencies": {
     "@expressive-code/plugin-line-numbers": "^0.41.3",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.8",
@@ -44,6 +48,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
+    "pagefind": "^1.4.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "tailwindcss": "^4",

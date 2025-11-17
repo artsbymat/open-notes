@@ -42,11 +42,16 @@ export default async function DetailNotesPage({ params }) {
   }
 
   const cssClasses = post.frontmatter?.cssclasses?.join(" ") || "";
+  const noIndex = post.frontmatter?.["no-index"] === true;
 
   return (
     <div>
       <TableOfContents headings={post.tableOfContents} />
-      <article id="md-content" className={`${cssClasses}`}>
+      <article
+        id="md-content"
+        className={`${cssClasses}`}
+        {...(noIndex ? { "data-pagefind-ignore": "" } : { "data-pagefind-body": "" })}
+      >
         <h1>{post.title}</h1>
         <RenderMarkdown post={post} />
       </article>

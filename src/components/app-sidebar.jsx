@@ -17,6 +17,7 @@ import {
   SidebarRail,
   SidebarSeparator
 } from "@/components/ui/sidebar";
+import { SearchInput } from "./SearchPost";
 import Image from "next/image";
 import Logo from "@/assets/logo.svg";
 import Link from "next/link";
@@ -31,6 +32,8 @@ export function AppSidebar({ fileTree, ...props }) {
       </SidebarHeader>
 
       <SidebarSeparator className="mx-0 px-2" />
+
+      <SearchInput />
 
       <SidebarContent>
         <SidebarGroup>
