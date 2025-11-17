@@ -98,18 +98,26 @@ export function remarkWikilink() {
         }
 
         // Build final URL
-        let url = targetSlug || `/${link}`;
+        let url;
         if (heading && !isMediaAsset) {
           // Convert heading to slug format (lowercase, hyphenated)
           const headingSlug = heading
             .toLowerCase()
             .replace(/\s+/g, "-")
             .replace(/[^\w-]/g, "");
-          url += `#${headingSlug}`;
+          
+          // If link is empty, it's a same-page heading link
+          if (!link || link.trim() === "") {
+            url = `#${headingSlug}`;
+          } else {
+            url = (targetSlug || `/${link}`) + `#${headingSlug}`;
+          }
+        } else {
+          url = targetSlug || `/${link}`;
         }
 
         // Determine display text
-        const displayText = alias || link;
+        const displayText = alias || (link || heading);
 
         if (isEmbed) {
           // Handle embeds: ![[Image.png]] or ![[Document.pdf]]
