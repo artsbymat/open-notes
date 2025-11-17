@@ -2,6 +2,7 @@
 
 public/content/
 public/pagefind/
+src/vault/
 
 # dependencies
 /node_modules
