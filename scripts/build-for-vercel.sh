@@ -21,11 +21,10 @@ rm -rf "${CONTENT_DIR}"
 
 echo "📥 Cloning private GitLab repository..."
 
-git -c credential.helper= \
-  clone \
+git clone \
   --depth 1 \
   --branch "${BRANCH}" \
-  "https://${GITLAB_PAT}:@${CONTENT_REPO}" \
+  "oauth2:https://${GITLAB_PAT}:@${CONTENT_REPO}" \
   "${CONTENT_DIR}"
 
 echo "🚀 Repo cloned successfully. Building app..."
