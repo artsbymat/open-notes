@@ -5,6 +5,27 @@ import { Backlinks } from "@/components/Backlinks";
 import { getAllSlugs, getMarkdownBySlug } from "@/lib/content";
 import { notFound } from "next/navigation";
 import { FileEntry } from "@/components/FileEntry";
+import removeMd from "remove-markdown";
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const finalSlug = `/` + slug.join("/");
+  const post = getMarkdownBySlug(finalSlug);
+
+  if (!post) {
+    return {};
+  }
+
+  if (post.isFolder) {
+    return {};
+  }
+
+  return {
+    title: post.title,
+    description: post.frontmatter.description || removeMd(post.content).slice(0, 180),
+    keywords: post.frontmatter.tags
+  };
+}
 
 export async function generateStaticParams() {
   return getAllSlugs();
