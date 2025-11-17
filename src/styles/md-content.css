@@ -220,7 +220,7 @@
 }
 
 /* Inline Code */
-#md-content p code {
+#md-content :not(pre) > code {
   background-color: #f2e5bc;
   border: 1px solid #e8d086;
   padding: 4px 0;
