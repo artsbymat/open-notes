@@ -46,6 +46,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <meta name="apple-mobile-web-app-title" content="Open Notes" />
+        <meta
+          name="google-site-verification"
+          content="ykJc6eMzlp8dlNUn5Kt1qOqw7JWu9HL_InssXyHJdMc"
+        />
       </head>
       <body className={`${poppins.variable} ${jetbrains.variable} ${arabic.variable} antialiased`}>
         <SidebarProvider>
