@@ -13,7 +13,7 @@ import { AppBreadcrumb } from "@/components/app-breadcrumb";
 import { METADATA } from "@/constants";
 
 const poppins = Poppins({
-  variable: "--font-inter",
+  variable: "--font-poppins",
   subsets: ["latin"],
   display: "swap",
   weight: ["300", "400", "500", "600", "700"]
