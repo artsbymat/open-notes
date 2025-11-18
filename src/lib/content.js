@@ -154,6 +154,22 @@ function buildBacklinksMap() {
     });
   });
 
+  // Remove duplicate
+  Object.keys(backlinks).forEach((slug) => {
+    const uniqueBacklinks = [];
+    const seen = new Set();
+
+    backlinks[slug].forEach((backlink) => {
+      const key = `${backlink.slug}-${backlink.title}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueBacklinks.push(backlink);
+      }
+    });
+
+    backlinks[slug] = uniqueBacklinks;
+  });
+
   cache = { ...(cache || {}), backlinks };
   return cache.backlinks;
 }
