@@ -60,7 +60,7 @@ export default function RootLayout({ children }) {
               <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
               <AppBreadcrumb allMarkdownFiles={allMarkdownFiles} />
             </header>
-            <div className="flex flex-1 flex-col p-2">
+            <div className="flex flex-1 flex-col p-1 xl:p-2">
               <div className="min-h-[100vh] flex-1 rounded-xl border p-4 md:min-h-min">
                 {children}
               </div>

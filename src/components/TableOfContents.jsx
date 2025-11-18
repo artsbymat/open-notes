@@ -1,5 +1,7 @@
 "use client";
 
+import { ScrollArea } from "./ui/scroll-area";
+
 export function TableOfContents({ headings }) {
   if (!headings || headings.length === 0) {
     return null;
@@ -8,7 +10,7 @@ export function TableOfContents({ headings }) {
   return (
     <div className="mb-6">
       <h3 className="mb-3 text-sm font-semibold uppercase">Table of Contents</h3>
-      <nav>
+      <ScrollArea className="flex h-full max-h-[400px] flex-col border-l pl-2">
         <ul className="space-y-2 text-sm">
           {headings.map((heading, index) => (
             <li key={index} style={{ paddingLeft: `${(heading.level - 1) * 0.75}rem` }}>
@@ -21,7 +23,7 @@ export function TableOfContents({ headings }) {
             </li>
           ))}
         </ul>
-      </nav>
+      </ScrollArea>
     </div>
   );
 }

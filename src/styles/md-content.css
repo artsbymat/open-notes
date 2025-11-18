@@ -241,9 +241,9 @@
 }
 
 /* Custom Callout */
-/* .callout { */
-/*   mix-blend-mode: normal !important; */
-/* } */
+.callout {
+  mix-blend-mode: normal !important;
+}
 
 #md-content [data-callout="arabic"] {
   --rc-color-light: var(--chart-1);
@@ -285,4 +285,39 @@
 /* Custom Classes */
 #md-content.quran p code {
   font-family: serif;
+}
+
+@media (width >= 48rem) {
+  #md-content p {
+    font-size: var(--body-size);
+    font-weight: var(--body-weight);
+    line-height: var(--body-line-height);
+    letter-spacing: var(--body-letter-spacing);
+  }
+
+  #md-content small,
+  #md-content figcaption {
+    font-size: var(--caption-size);
+    line-height: var(--caption-line-height);
+    font-weight: var(--caption-weight);
+    letter-spacing: var(--caption-letter-spacing);
+    color: var(--color-muted-foreground);
+  }
+}
+
+@media (width >= 80rem) {
+  #md-content p {
+    font-size: var(--body-xl-size);
+    font-weight: var(--body-xl-weight);
+    line-height: var(--body-xl-line-height);
+    letter-spacing: var(--body-xl-letter-spacing);
+  }
+
+  #md-content small,
+  #md-content figcaption {
+    font-size: var(--caption-lg-size);
+    line-height: var(--caption-lg-line-height);
+    font-weight: var(--caption-lg-weight);
+    letter-spacing: var(--caption-lg-letter-spacing);
+  }
 }

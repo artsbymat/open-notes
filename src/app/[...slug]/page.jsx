@@ -47,20 +47,30 @@ export default async function DetailNotesPage({ params }) {
 
   const cssClasses = post.frontmatter?.cssclasses?.join(" ") || "";
   const noIndex = post.frontmatter?.["no-index"] === true;
+  const noSidebar = post.frontmatter?.["no-sidebar"] === true;
 
   return (
-    <div>
-      <TableOfContents headings={post.tableOfContents} />
-      <article
-        id="md-content"
-        className={`${cssClasses}`}
-        {...(noIndex ? { "data-pagefind-ignore": "" } : { "data-pagefind-body": "" })}
+    <div className="flex gap-6">
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <article
+          id="md-content"
+          className={`${cssClasses}`}
+          {...(noIndex ? { "data-pagefind-ignore": "" } : { "data-pagefind-body": "" })}
+        >
+          <h1>{post.title}</h1>
+          <RenderMarkdown post={post} />
+        </article>
+      </div>
+
+      {/* Right Sidebar */}
+      <aside
+        className={`sticky top-20 hidden h-full w-64 flex-col space-y-6 self-start ${noSidebar ? "hidden" : "lg:flex"}`}
       >
-        <h1>{post.title}</h1>
-        <RenderMarkdown post={post} />
-      </article>
-      <OutgoingLinks links={post.outgoingLinks} />
-      <Backlinks links={post.backlinks} />
+        <TableOfContents headings={post.tableOfContents} />
+        <Backlinks links={post.backlinks} />
+        <OutgoingLinks links={post.outgoingLinks} />
+      </aside>
     </div>
   );
 }
