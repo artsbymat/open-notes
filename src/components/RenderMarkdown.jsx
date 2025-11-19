@@ -20,9 +20,16 @@ import "rehype-callouts/theme/obsidian";
 import "katex/dist/katex.min.css";
 import rehypeRaw from "rehype-raw";
 import remarkObsidianHighlight from "@/lib/remark/remark-highlight";
+import remarkTagLink from "@/lib/remark/remark-tag";
 
 export function RenderMarkdown({ post }) {
-  const remarkPlugins = [remarkGfm, remarkMath, remarkObsidianHighlight, remarkWikilink];
+  const remarkPlugins = [
+    remarkGfm,
+    remarkMath,
+    remarkObsidianHighlight,
+    remarkWikilink,
+    remarkTagLink
+  ];
   const rehypePlugins = [
     rehypeSlug,
     [rehypeAutolinkHeadings, { behavior: "append" }],

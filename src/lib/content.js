@@ -504,3 +504,117 @@ export function getAllMediaAssets() {
   cache = { ...(cache || {}), mediaAssets };
   return cache.mediaAssets;
 }
+
+function extractTagsFromContent(rawContent) {
+  const lines = rawContent.split("\n");
+  const tags = new Set();
+
+  let insideCodeBlock = false;
+
+  for (let line of lines) {
+    const trimmed = line.trim();
+
+    // Detect code fences
+    if (trimmed.startsWith("```")) {
+      insideCodeBlock = !insideCodeBlock;
+      continue;
+    }
+    if (insideCodeBlock) continue;
+
+    // Remove wikilinks entirely
+    let cleanLine = trimmed.replace(/\[\[[^\]]+\]\]/g, "");
+
+    // Skip images
+    if (/!\[[^\]]*\]\([^)]+\)/.test(cleanLine)) continue;
+
+    // Skip link-only line
+    if (/^\[[^\]]+\]\([^)]+\)$/.test(cleanLine)) continue;
+
+    // Skip HTML/component-like
+    if (cleanLine.startsWith("<") && cleanLine.endsWith(">")) continue;
+
+    // Remove inline code
+    cleanLine = cleanLine.replace(/`([^`]+)`/g, "");
+
+    // Only allow paragraphs & list items
+    const isParagraph = /^[A-Za-z0-9#]/.test(cleanLine);
+    const isList = /^[-*+]\s+|^\d+\.\s+/.test(cleanLine);
+    if (!isParagraph && !isList) continue;
+
+    // Extract #tag
+    const tagRegex = /#([a-zA-Z0-9/_-]+)/g;
+    let match;
+
+    while ((match = tagRegex.exec(cleanLine)) !== null) {
+      let tag = match[1].trim();
+
+      // Convert "ini/tag" → "ini%2Ftag"
+      if (tag.includes("/")) {
+        tag = tag.replace(/\//g, "%2F");
+      }
+
+      tags.add(tag);
+    }
+  }
+
+  return Array.from(tags);
+}
+
+export function getAllTags() {
+  const all = getAllMarkdownFiles();
+  const allTags = new Set();
+
+  for (const item of all) {
+    const fullPath = path.join("src/vault", item.filepath);
+    const raw = fs.readFileSync(fullPath, "utf8");
+    const { data, content } = matter(raw);
+
+    // Frontmatter tags
+    if (Array.isArray(data.tags)) {
+      data.tags.forEach((tag) => {
+        if (typeof tag === "string") {
+          const clean = tag.replace(/^\#/, "").replace(/\//g, "%2F");
+          allTags.add(clean);
+        }
+      });
+    }
+
+    // Content tags
+    extractTagsFromContent(content).forEach((tag) => allTags.add(tag));
+  }
+
+  return Array.from(allTags).sort();
+}
+
+export function getPostsByTag(requestedTag) {
+  const encodedTag = requestedTag.replace(/\//g, "%2F");
+
+  const all = getAllMarkdownFiles();
+  const results = [];
+
+  for (const item of all) {
+    const fullPath = path.join("src/vault", item.filepath);
+    const raw = fs.readFileSync(fullPath, "utf8");
+    const { data, content } = matter(raw);
+
+    let tags = [];
+
+    // Frontmatter
+    if (Array.isArray(data.tags)) {
+      tags.push(...data.tags.map((t) => t.replace(/^\#/, "").replace(/\//g, "%2F")));
+    }
+
+    // Content tags
+    tags.push(...extractTagsFromContent(content));
+
+    if (tags.includes(encodedTag)) {
+      results.push({
+        slug: item.slug,
+        title: item.title,
+        filepath: item.filepath
+      });
+    }
+  }
+
+  return results.sort((a, b) => a.title.localeCompare(b.title));
+}
